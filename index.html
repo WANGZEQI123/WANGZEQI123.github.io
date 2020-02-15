@@ -66,6 +66,221 @@
     
     
     
+    <article id="post-Database-System-CS186-Intro-to-database" class="article article-type-post" itemscope
+  itemprop="blogPost" data-scroll-reveal>
+
+  <div class="article-inner">
+    
+    <header class="article-header">
+       
+<h2 itemprop="name">
+  <a class="article-title" href="/2020/02/15/Database-System-CS186-Intro-to-database/"
+    >Database System CS186 Intro to database</a
+  >
+</h2>
+  
+
+    </header>
+    
+
+    
+    <div class="article-meta">
+      <a href="/2020/02/15/Database-System-CS186-Intro-to-database/" class="article-date">
+  <time datetime="2020-02-15T07:21:57.000Z" itemprop="datePublished">2020-02-15</time>
+</a>
+      
+      
+      
+      
+    </div>
+    
+
+    
+
+    <div class="article-entry" itemprop="articleBody">
+      
+
+
+      
+
+      
+      <h1 id="Introduction-to-database-systems"><a href="#Introduction-to-database-systems" class="headerlink" title="Introduction to database systems"></a>Introduction to database systems</h1><p>There are 2 questions to ask about database systems, </p>
+<ol>
+<li>Why? (Why we need database systems)</li>
+<li>What? (What role does database systems play in CS field)</li>
+</ol>
+<p>Let’s look at them one by one.</p>
+<h2 id="Why"><a href="#Why" class="headerlink" title="Why?"></a>Why?</h2><p>Data is the center of everything.</p>
+<p>The world’s volume of information is doubling every 2 years. At 2011, we have 1.8 zettabytes data in total.</p>
+<img src="C:\Users\Wangzeqi\AppData\Roaming\Typora\typora-user-images\image-20200215143036207.png" alt="image-20200215143036207" style="zoom:50%;" />
+
+<p>In order to handle such huge amount of data, we need the help of database system, because it’s in possible to do in-memory calculation and analysis for Big Data.</p>
+<h2 id="What"><a href="#What" class="headerlink" title="What?"></a>What?</h2><p>Database seems to be far from our daily life. However, almost everything you are using is related to database system. For example, search engine has a big database behind it so that it could offer you the web page that you are looking for. </p>
+<p>So what is a database?</p>
+<p><strong>A database is a large collection of <u>structured data</u></strong></p>
+<p>And what is a database system?</p>
+<p><strong>A Database Management System (DBMS) is software that stores, manages and/or facilitates access to databases.</strong></p>
+<p>Traditionally, this concept narrows to <strong>relational databases with transactions</strong>. But recently, more  and more non-relational database systems appear, such like MongoDB, Redis, etc.</p>
+<h2 id="Dealing-with-Big-Data"><a href="#Dealing-with-Big-Data" class="headerlink" title="Dealing with Big Data"></a>Dealing with Big Data</h2><p>As we know, for big data, it’s impossible to load all the data into memory and do fast in-memory calculation.  To handle big data, we have 2 basic tools: <strong>Streaming</strong> and <strong>Divide-and-Conquer</strong>.</p>
+<p>Before we continue, we first make a simplified assumption:</p>
+<p><strong>Unordered collections of data items</strong></p>
+<p>This means, we can handle the data in any order that we’d like to.</p>
+<h3 id="Streaming-through-RAM"><a href="#Streaming-through-RAM" class="headerlink" title="Streaming through RAM"></a>Streaming through RAM</h3><p>Streaming means that we are doing something to each record one by one, and the operation we apply to each record has nothing to do with other records. One simple example could be <strong>Map</strong>.</p>
+<p>The goal of Map is: compute $f(x)$ for each record $x$, write out the result to disk.</p>
+<p>The approach for this is:</p>
+<ol>
+<li>Read a sizable chunk from <strong>INPUT</strong> (Disk) to an <em>Input</em> <em>Buffer</em> (Memory)</li>
+<li>Write $f(x)$ for each item to an <em>Output</em> <em>Buffer</em> (Memory)</li>
+<li>When <em>Input Buffer</em> is consumed, read another chunk</li>
+<li>When <em>Output Buffer</em> (Memory) fills, write it to <strong>OUTPUT</strong> (Disk)</li>
+</ol>
+<p>The graph below shows this process.</p>
+<img src="C:\Users\Wangzeqi\AppData\Roaming\Typora\typora-user-images\image-20200215150109424.png" alt="image-20200215150109424" style="zoom:60%;" />
+
+<p>Because of the unordered assumption, this process can be easily paralleled. </p>
+<h3 id="Divide-and-Conquer"><a href="#Divide-and-Conquer" class="headerlink" title="Divide and Conquer"></a>Divide and Conquer</h3><p>Streaming is relatively simple because it handles one chunk at a time. But some algorithms need certain items to be co-resident in memory, which is not guaranteed in Streaming.</p>
+<p>This is called rendezvous. </p>
+<p>Out-of-core algorithms can use divide and conquer method to orchestrate rendezvous.</p>
+<p>Typical RAM Allocation (Assume B chunks worth of RAM):</p>
+<ul>
+<li><p>Use 1 chunk of RAM to read into</p>
+</li>
+<li><p>Use 1 chunk of RAM to write into</p>
+</li>
+<li><p>B-2 chunks of RAM as space for rendezvous</p>
+</li>
+</ul>
+<p>Phase 1:</p>
+<ul>
+<li><p>“streamwise” <em>divide</em> into N/(B-2) megachunks</p>
+</li>
+<li><p><em>conquer</em> each and write to disk</p>
+</li>
+</ul>
+<img src="C:\Users\Wangzeqi\AppData\Roaming\Typora\typora-user-images\image-20200215151443590.png" alt="image-20200215151443590" style="zoom:60%;" />
+
+<p>Phase 2:</p>
+<ul>
+<li><p>a streaming algorithm over <em>conquered</em> <em>megachunks**.</em></p>
+</li>
+<li><p>the streaming must ensure <em>rendezvous</em></p>
+<p><em>but among rendezvous groups, order still immaterial!</em></p>
+</li>
+</ul>
+<img src="C:\Users\Wangzeqi\AppData\Roaming\Typora\typora-user-images\image-20200215151614389.png" alt="image-20200215151614389" style="zoom:60%;" />
+
+<p>There are two kernels for rendezvous: <strong>Sorting</strong> and <strong>Hashing</strong>, we will discuss them in detail in next chapter</p>
+
+      
+      <!-- 打赏 -->
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2020/02/15/Database-System-CS186-Intro-to-database/" data-id="ck6n9ww2f000110iocgmj6khc"
+        class="article-share-link">分享</a>
+        
+      
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/database-cs186-introduction/" rel="tag">database, cs186, introduction</a></li></ul>
+
+    </footer>
+
+  </div>
+
+  
+
+  
+  
+  
+
+  
+
+</article>
+    
+    <article id="post-Database-System-CS186-Tree-Index-Structure" class="article article-type-post" itemscope
+  itemprop="blogPost" data-scroll-reveal>
+
+  <div class="article-inner">
+    
+    <header class="article-header">
+       
+<h2 itemprop="name">
+  <a class="article-title" href="/2020/02/05/Database-System-CS186-Tree-Index-Structure/"
+    >Database System, CS186, Tree Index Structure</a
+  >
+</h2>
+  
+
+    </header>
+    
+
+    
+    <div class="article-meta">
+      <a href="/2020/02/05/Database-System-CS186-Tree-Index-Structure/" class="article-date">
+  <time datetime="2020-02-05T02:38:24.000Z" itemprop="datePublished">2020-02-05</time>
+</a>
+      
+      
+      
+      
+    </div>
+    
+
+    
+
+    <div class="article-entry" itemprop="articleBody">
+      
+
+
+      
+
+      
+      <h1 id="Tree-Structured-Index"><a href="#Tree-Structured-Index" class="headerlink" title="Tree Structured Index"></a>Tree Structured Index</h1><p>Database files can be unordered (heap), sorted, or kind of sorted on a search key (clustered). Clustered files is indexed on some columns or fields of the table. With index, this type of files can support fast search based on these columns. Index can be organized with many different data structures, like hashing, tree, etc.</p>
+<p>Tree structured index has been the most popular data structure for indexes in database.</p>
+<h2 id="Introduction"><a href="#Introduction" class="headerlink" title="Introduction"></a>Introduction</h2><ul>
+<li><p>Support selections of form: <em>field</em> &lt;op&gt; <em>constant</em>:</p>
+<ol>
+<li>Equality selections, where op is =.</li>
+<li>Range selections, where op is one of &lt;, &gt;, &lt;=, &gt;=, BETWEEN.</li>
+<li>Even more complex selections (e.g. spatial containment)</li>
+</ol>
+<p>Different ops requires different data structures.</p>
+</li>
+<li><p>Tree-Structured indexing support both equality and range selections.</p>
+<ol>
+<li>ISAM (Indexed Sequential Access Method): static structure, old tech.</li>
+<li>B+ Tree: dynamic, adjust gracefully under inserts and deletes.</li>
+</ol>
+</li>
+</ul>
+<p>Actually, B+ Tree is almost always better than ISAM, but ISAM can be a good start to understand B+ Tree.</p>
+<h2 id="ISAM"><a href="#ISAM" class="headerlink" title="ISAM"></a>ISAM</h2><p>Let’s start with range search problem.</p>
+<p>Sorted Files with binary search? Can be quite expensive (too many IOs).</p>
+
+      
+      <!-- 打赏 -->
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2020/02/05/Database-System-CS186-Tree-Index-Structure/" data-id="ck6n9ww27000010iohpj88gn2"
+        class="article-share-link">分享</a>
+        
+      
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Database-cs186-B-Tree-Index/" rel="tag">Database, cs186, B Tree, Index</a></li></ul>
+
+    </footer>
+
+  </div>
+
+  
+
+  
+  
+  
+
+  
+
+</article>
+    
     <article id="post-hello-world" class="article article-type-post" itemscope
   itemprop="blogPost" data-scroll-reveal>
 
